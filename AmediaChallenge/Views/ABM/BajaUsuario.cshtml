@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Alta Usuario Page";
+}
+@model AmediaChallenge.ViewModels.BajaUsuarioViewModel
+
+<div class="text-center">
+    <h1 class="display-4">Baja de usuario</h1>
+
+    <form asp-controller="BajaUsuarioController" asp-action="BajaUsuario" method="post" id="bajaUsuarioForm" role="form">
+        <div class="form-row">
+            <div class="form-group col-md-2">
+                <label class="form-label" asp-for="Username"></label>
+                @Html.TextBoxFor(x => x.Username, new { @required = "required", @class = "form-control" })
+            </div>
+        </div>
+        <button type="submit">Delete</button>
+    </form>
+</div>

@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Alta Usuario Page";
+}
+@model AmediaChallenge.ViewModels.ModificacionUsuarioViewModel
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+
+    <form asp-controller="ModificacionUsuarioController" asp-action="ModificacionUsuario" method="post" id="modificacionUsuarioForm" role="form">
+        <div class="form-row">
+            <div class="form-group col-md-2">
+                <label class="form-label" asp-for="Password"></label>
+                @Html.TextBoxFor(x => x.Password, new { @required = "required", @class = "form-control", @type = "password" })
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-2">
+                <label class="form-label" asp-for="Email"></label>
+                @Html.TextBoxFor(x => x.Email, new { @required = "required", @class = "form-control", @type = "email" })
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-2">
+                <label class="form-label" asp-for="Name"></label>
+                @Html.TextBoxFor(x => x.Name, new { @required = "required", @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-2">
+                <label class="form-label" asp-for="Surname"></label>
+                @Html.TextBoxFor(x => x.Surname, new { @required = "required", @class = "form-control" })
+            </div>
+        </div>
+        <button type="submit">Create</button>
+    </form>
+</div>
+

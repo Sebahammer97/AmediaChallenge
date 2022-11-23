@@ -1,0 +1,467 @@
+Scripts:
+1. CREATE TABLE tAlquiler
+(
+cod_alquiler INT IDENTITY PRIMARY KEY
+, cod_usuario INT
+, cod_pelicula INT
+, precio_alquiler NUMERIC(18,2)
+, fecha_transaccion DATETIME DEFAULT GETDATE()
+, fecha_devolucion DATETIME
+, devuelto BIT DEFAULT 0
+, CONSTRAINT fk_alquiler_usuario FOREIGN KEY(cod_usuario) REFERENCES tUsers(cod_usuario)
+, CONSTRAINT fk_alquiler_pelicula FOREIGN KEY(cod_pelicula) REFERENCES tPelicula(cod_pelicula)
+)
+GO
+
+CREATE TABLE tVenta
+(
+cod_venta INT IDENTITY PRIMARY KEY
+, cod_usuario INT
+, cod_pelicula INT
+, precio_venta NUMERIC(18,2)
+, fecha_transaccion DATETIME DEFAULT GETDATE()
+, CONSTRAINT fk_venta_usuario FOREIGN KEY(cod_usuario) REFERENCES tUsers(cod_usuario)
+, CONSTRAINT fk_venta_pelicula FOREIGN KEY(cod_pelicula) REFERENCES tPelicula(cod_pelicula)
+)
+GO
+
+1.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Hammerschmidt, Sebastian>
+-- Create date: 22/11/2022
+-- Description:	<Crear usuarios, cuyo documento no exista actualmente en la base de datos, en
+--				caso de existir, debería devolver un mensaje de error, en caso contrario insertarlo>
+-- =============================================
+CREATE PROCEDURE CrearUsario
+	-- Add the parameters for the stored procedure here
+	@User VARCHAR(50),
+	@Password VARCHAR(50),
+	@Nombre VARCHAR(200),
+	@Apellido VARCHAR(200),
+	@Numero_Documento VARCHAR(50),
+	@Rol VARCHAR(50)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+	IF EXISTS (SELECT cod_rol FROM [dbo].tUSers WHERE nro_doc = @Numero_Documento)
+			THROW 51000, 'Ya existe un usuario con el mismo número de documento. Por favor intente con otro.', 1
+		ELSE
+		BEGIN
+			DECLARE @Cod_rol INT = (SELECT cod_rol FROM [dbo].[tRol] WHERE txt_desc = @Rol AND sn_activo <> -1)
+
+			-- Posibles mejoras:
+			--	Chequeo de existencia de rol
+			--	Chequeo de un password valido
+			--	Encriptacion de password
+			--	Chequeo de usuario unico
+
+			INSERT INTO tUsers (txt_user, txt_password, txt_nombre, txt_apellido, nro_doc, cod_rol, sn_activo)
+			VALUES (@User, @Password, @Nombre, @Apellido, @Numero_Documento, @Cod_rol, 1)
+		END
+END
+GO
+
+2.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Hammerschmidt, Sebastian>
+-- Create date: 22/11/2022
+-- Description:	 Crear/Borrar/Modificar peliculas (Borrar es poner en 0 el stock de ventas y
+--				 alquileres)
+-- =============================================
+CREATE PROCEDURE ABM_Peliculas 
+	@CodPelicula INT = -1, -- Creacion de pelicula como valor por defecto
+	@Descripcion VARCHAR(500) = NULL,
+	@Stock_Alquiler INT = NULL,
+	@Stock_Venta INT = NULL,
+	@Precio_Alquiler NUMERIC(18,2) = NULL,
+	@Precio_Venta NUMERIC(18,2) = NULL
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+	IF (@CodPelicula = -1) -- Creacion de una nueva pelicula
+	BEGIN
+		IF (@Descripcion IS NULL AND @Stock_Alquiler IS NULL AND @Stock_Venta IS NULL AND @Precio_Alquiler IS NULL AND @Precio_Venta IS NULL)
+			THROW 51000, 'Error al insertar la pelicula. Por favor complete todos los parametros', 1
+		INSERT INTO [dbo].tPelicula (txt_desc, cant_disponibles_alquiler, cant_disponibles_venta, precio_alquiler, precio_venta)
+		VALUES (@Descripcion, @Stock_Alquiler, @Stock_Venta, @Precio_Alquiler, @Precio_Venta)
+
+		-- Mejoras:
+		--	Chequear si ya existe una pelicula con la misma descripcion para no generar registros duplicados
+	END
+	ELSE -- Modificacion de una pelicula existente
+	BEGIN 
+		IF EXISTS (SELECT cod_pelicula FROM [dbo].tPelicula WHERE cod_pelicula = @CodPelicula)
+		BEGIN
+			IF (@Descripcion IS NOT NULL)
+				UPDATE tPelicula SET txt_desc = @Descripcion WHERE cod_pelicula = @CodPelicula
+			IF (@Stock_Alquiler IS NOT NULL)
+				UPDATE tPelicula SET cant_disponibles_alquiler = @Stock_Alquiler WHERE cod_pelicula = @CodPelicula
+			IF (@Stock_Venta IS NOT NULL)
+				UPDATE tPelicula SET cant_disponibles_venta = @Stock_Venta WHERE cod_pelicula = @CodPelicula
+			IF (@Precio_Alquiler IS NOT NULL)
+				UPDATE tPelicula SET precio_alquiler = @Precio_Alquiler WHERE cod_pelicula = @CodPelicula
+			IF (@Precio_Venta IS NOT NULL)
+				UPDATE tPelicula SET precio_venta = @Precio_Venta WHERE cod_pelicula = @CodPelicula
+			
+			-- Mejoras:
+			--	Hacer validaciones de los valores (ejemplo: no aceptar numeros negativos)
+		END
+		ELSE
+			THROW 51000, 'La pelicula que intenta modificar no existe. Por favor intente con otra', 1
+	END
+END
+GO
+
+3.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Hamemrschmidt, Sebastian
+-- Create date: 22/11/2022
+-- Description:	 Crear géneros
+-- =============================================
+CREATE PROCEDURE CrearGenero
+	@Descripcion VARCHAR(500)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+	IF EXISTS(SELECT cod_genero FROM [dbo].tGenero WHERE txt_desc = @Descripcion)
+		THROW 51000, 'Ya existe un genero con la misma descripcion. Por favor intente con otro', 1
+	ELSE
+		INSERT INTO [dbo].tGenero (txt_desc)
+		VALUES (@Descripcion)
+END
+GO
+
+4.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Hammerschmidt, Sebastian
+-- Create date: 22/11/2022
+-- Description:	Asignar géneros a películas, verificar que la película no tenga asignada el
+--				género previamente.
+-- =============================================
+CREATE PROCEDURE AsignarGeneroPelicula
+	@Pelicula VARCHAR(500),
+	@Genero VARCHAR(500)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	
+	DECLARE 
+		@CodPelicula INT = (SELECT cod_pelicula FROM [dbo].tPelicula WHERE txt_desc = @Pelicula),
+		@CodGenero INT = (SELECT cod_genero FROM [dbo].tGenero WHERE txt_desc = @Genero)
+
+	IF (@CodPelicula IS NOT NULL AND @CodGenero IS NOT NULL)
+		IF EXISTS(SELECT cod_pelicula, cod_genero FROM [dbo].tGeneroPelicula WHERE cod_pelicula = @CodPelicula AND cod_genero = @CodGenero)
+			THROW 51000, 'La pelicula ya se encuentra asignada a ese genero. Por favor intente con otro', 1
+		ELSE
+		BEGIN
+			INSERT INTO [dbo].tGeneroPelicula (cod_pelicula, cod_genero)
+			VALUES (@CodPelicula, @CodGenero)
+		END
+	ELSE
+		THROW 51000, 'Genero o pelicula no encontrado. Por favor intente otra vez', 1
+END
+GO
+
+5.
+
+6.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Hamemrschmidt, Sebastian
+-- Create date: 22/11/2022
+-- Description:	 Obtener las películas en stock para alquiler
+-- =============================================
+CREATE PROCEDURE ConsultarStockPeliculasAlquiler
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+	SELECT
+		  cod_pelicula
+		, txt_desc
+		, cant_disponibles_alquiler AS 'stock disponible'
+	FROM [dbo].tPelicula
+	WHERE cant_disponibles_alquiler > 0
+END
+GO
+
+7.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Hammerschmidt, Sebastian
+-- Create date: 22/11/2022
+-- Description:	Obtener las películas en stock para vender
+-- =============================================
+CREATE PROCEDURE ConsultarStockPeliculasVenta
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    SELECT
+		  cod_pelicula
+		, txt_desc
+		, cant_disponibles_venta AS 'stock disponible'
+	FROM [dbo].tPelicula
+	WHERE cant_disponibles_venta > 0
+END
+GO
+
+8.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Hammerschmidt, Sebastian
+-- Create date: 22/11/2022
+-- Description:	Alquilar una pelicula disponible
+-- =============================================
+CREATE PROCEDURE AlquilarPelicula
+	@Pelicula VARCHAR(500),
+	@User VARCHAR(50),
+	@DiasAlquiler INT
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    DECLARE
+		@CodPelicula INT,
+		@CantPeliculas INT,
+		@PrecioPeliculaAlquiler NUMERIC(18,2),
+		@CodUser INT = (SELECT cod_usuario from [dbo].tUsers WHERE txt_user = @User)
+
+	SELECT 
+		@CodPelicula = cod_pelicula
+		, @CantPeliculas = cant_disponibles_alquiler 
+		, @PrecioPeliculaAlquiler = precio_alquiler
+		FROM [dbo].tPelicula WHERE txt_desc = @Pelicula
+
+	IF (@CodPelicula IS NOT NULL AND @CantPeliculas IS NOT NULL AND @PrecioPeliculaAlquiler IS NOT NULL AND @CodUser IS NOT NULL)
+	BEGIN
+		IF (@CantPeliculas - 1 >= 0)
+		BEGIN
+			UPDATE tPelicula SET cant_disponibles_alquiler = @CantPeliculas - 1 WHERE cod_pelicula = @CodPelicula
+			INSERT INTO tAlquiler (cod_usuario, cod_pelicula, precio_alquiler, fecha_devolucion)
+			VALUES (@CodUser, @CodPelicula, @PrecioPeliculaAlquiler, DATEADD(DAY, @DiasAlquiler, GETDATE()))
+		END
+		ELSE
+			THROW 51000, 'Stock insuficiente para alquilar la pelicula', 1
+	END
+	ELSE
+		THROW 51000, 'Pelicula o usuario no encontrado', 1
+END
+GO
+
+9.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Hammerschmidt, Sebastian
+-- Create date: 22/11/2022
+-- Description:	Vender una pelicula disponible
+-- =============================================
+CREATE PROCEDURE VenderPelicula
+	@Pelicula VARCHAR(500),
+	@User VARCHAR(50)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    DECLARE
+		@CodPelicula INT,
+		@CantPeliculas INT,
+		@PrecioPeliculaVenta NUMERIC(18,2),
+		@CodUser INT = (SELECT cod_usuario from [dbo].tUsers WHERE txt_user = @User)
+
+	SELECT 
+		@CodPelicula = cod_pelicula
+		, @CantPeliculas = cant_disponibles_venta
+		, @PrecioPeliculaVenta = precio_venta
+		FROM [dbo].tPelicula WHERE txt_desc = @Pelicula
+
+	IF (@CodPelicula IS NOT NULL AND @CantPeliculas IS NOT NULL AND @PrecioPeliculaVenta IS NOT NULL AND @CodUser IS NOT NULL)
+	BEGIN
+		IF (@CantPeliculas - 1 >= 0)
+		BEGIN
+			UPDATE tPelicula SET cant_disponibles_venta = @CantPeliculas - 1 WHERE cod_pelicula = @CodPelicula
+			INSERT INTO tVenta (cod_usuario, cod_pelicula, precio_venta)
+			VALUES (@CodUser, @CodPelicula, @PrecioPeliculaVenta)
+		END
+		ELSE
+			THROW 51000, 'Stock insuficiente para vender la pelicula', 1
+	END
+	ELSE
+		THROW 51000, 'Pelicula o usuario no encontrado', 1
+END
+GO
+
+10.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Hamemrschmidt, Sebastian
+-- Create date: 22/11/2022
+-- Description:	Devolucion de una pelicula alquilada
+-- =============================================
+CREATE PROCEDURE DevolverPelicula 
+	@Pelicula VARCHAR(500),
+	@User VARCHAR(50)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+	DECLARE
+		@CodPelicula INT,
+		@CantPeliculas INT,
+		@CodUser INT = (SELECT cod_usuario from [dbo].tUsers WHERE txt_user = @User)
+
+	SELECT @CodPelicula = cod_pelicula, @CantPeliculas = cant_disponibles_alquiler FROM [dbo].tPelicula WHERE txt_desc = @Pelicula
+
+	IF (@CodPelicula IS NOT NULL AND @CantPeliculas IS NOT NULL AND @CodUser IS NOT NULL)
+	BEGIN
+		UPDATE tPelicula SET cant_disponibles_alquiler = @CantPeliculas + 1 WHERE cod_pelicula = @CodPelicula
+		UPDATE tAlquiler SET devuelto = 1 WHERE cod_pelicula = @CodPelicula AND cod_usuario = @CodUser
+	END
+END
+GO
+
+11.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Hammerschmidt, Sebastian
+-- Create date: 22/11/2022
+-- Description:	Obtener las películas en stock para vender
+-- =============================================
+CREATE PROCEDURE ConsultarPeliculaNoDevueltas
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    SELECT
+		P.txt_desc AS 'Pelicula'
+		, U.txt_user AS 'Usuario'
+		, U.txt_apellido + ', ' + U.txt_nombre AS 'Persona'
+	FROM [dbo].tAlquiler A
+	JOIN [dbo].tPelicula P
+		ON P.cod_pelicula = a.cod_pelicula
+	JOIN [dbo].tUsers U
+		ON u.cod_usuario = a.cod_usuario
+	WHERE A.devuelto = 0
+END
+GO
+
+12.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Hamemrschmidt, Sebastian
+-- Create date: 22/11/2022
+-- Description:	Generacion de un reporte para ver qué películas 
+--				fueron alquiladas por usuario y cuánto pagó y que día
+-- =============================================
+CREATE PROCEDURE ReportePeliculasAlquiladasPorUsuarios
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+	SELECT
+		P.txt_desc AS 'Pelicula',
+		U.txt_user AS 'Usuario',
+		A.precio_alquiler AS 'Valor',
+		A.fecha_transaccion AS 'Fecha de alquiler'
+	FROM [dbo].tAlquiler A
+	JOIN [dbo].tPelicula P
+		ON P.cod_pelicula = A.cod_pelicula
+	JOIN [dbo].tUsers U
+		ON U.cod_usuario = A.cod_usuario
+	ORDER BY U.txt_user, A.fecha_transaccion DESC
+END
+GO
+
+13.
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Hammerschmidt, Sebastian
+-- Create date: 22/11/2022
+-- Description:	Generacion de un reporte para ver todas 
+--				las películas, cuantas veces fueron alquiladas 
+--				y cuanto se recaudo por ellas
+-- =============================================
+CREATE PROCEDURE ReportePeliculasAlquiladas
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    SELECT
+		P.txt_desc AS 'Pelicula'
+		, ISNULL(COUNT(A.cod_pelicula), 0) AS 'Cantidad de alquileres'
+		, ISNULL(SUM(A.precio_alquiler), 0) AS 'Total recaudado'
+	FROM [dbo].tPelicula P
+	LEFT JOIN [dbo].tAlquiler A
+		ON  A.cod_pelicula = P.cod_pelicula 
+	GROUP BY P.txt_desc
+	ORDER BY 'Total recaudado' DESC, 'Cantidad de alquileres' DESC
+END
+GO
+
