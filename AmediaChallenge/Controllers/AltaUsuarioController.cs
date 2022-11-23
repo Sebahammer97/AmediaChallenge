@@ -1,5 +1,6 @@
 ﻿using AmediaChallenge.DatabaseContext;
 using AmediaChallenge.Forms;
+using AmediaChallenge.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,9 +17,11 @@ namespace AmediaChallenge.Controllers
         }
 
         // GET: AltaUsuarioController/Create
-        public ActionResult Create()
+        public ActionResult AltaUsuario()
         {
-            return View();
+            AltaUsuarioViewModel viewModel = new AltaUsuarioViewModel(amediaDbContext);
+
+            return View("AltaUsuario", viewModel);
         }
 
         // POST: AltaUsuarioController/Create

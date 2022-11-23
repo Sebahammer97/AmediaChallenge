@@ -1,4 +1,4 @@
-﻿using AmediaChallenge.Models;
+﻿using AmediaChallenge.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 

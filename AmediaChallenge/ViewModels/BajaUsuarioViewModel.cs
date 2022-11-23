@@ -1,9 +1,18 @@
-﻿namespace AmediaChallenge.ViewModels
+﻿using AmediaChallenge.Forms;
+
+namespace AmediaChallenge.ViewModels
 {
     public class BajaUsuarioViewModel
     {
         #region Properties
-        public string Username { get; set; }
+        public BajaUsuarioForm Form { get; set; }
+        #endregion
+
+        #region Ctrs
+        public BajaUsuarioViewModel() 
+        {
+            Form = new BajaUsuarioForm();
+        }
         #endregion
     }
 }

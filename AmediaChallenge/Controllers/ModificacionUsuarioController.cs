@@ -1,5 +1,6 @@
 ﻿using AmediaChallenge.DatabaseContext;
 using AmediaChallenge.Forms;
+using AmediaChallenge.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AmediaChallenge.Controllers
@@ -14,9 +15,11 @@ namespace AmediaChallenge.Controllers
         }
 
         // GET: AltaUsuarioController/Edit/5
-        public ActionResult Edit(int id)
+        public ActionResult ModificacionUsuario(int id)
         {
-            return View();
+            ModificacionUsuarioViewModel viewModel = new ModificacionUsuarioViewModel(amediaDbContext, id);
+
+            return View("ModificacionUsuario", viewModel);
         }
 
         // POST: AltaUsuarioController/Edit/5

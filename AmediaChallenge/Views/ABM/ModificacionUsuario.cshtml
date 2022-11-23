@@ -7,28 +7,30 @@
     <h1 class="display-4">Welcome</h1>
 
     <form asp-controller="ModificacionUsuarioController" asp-action="ModificacionUsuario" method="post" id="modificacionUsuarioForm" role="form">
+        @Html.HiddenFor(model => model.Form.id_user)
+        
         <div class="form-row">
             <div class="form-group col-md-2">
-                <label class="form-label" asp-for="Password"></label>
-                @Html.TextBoxFor(x => x.Password, new { @required = "required", @class = "form-control", @type = "password" })
+                <label class="form-label" asp-for="Form.Password"></label>
+                @Html.TextBoxFor(x => x.Form.Password, new { @required = "required", @class = "form-control", @type = "password" })
             </div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-2">
-                <label class="form-label" asp-for="Email"></label>
-                @Html.TextBoxFor(x => x.Email, new { @required = "required", @class = "form-control", @type = "email" })
+                <label class="form-label" asp-for="Form.Email"></label>
+                @Html.TextBoxFor(x => x.Form.Email, new { @required = "required", @class = "form-control", @type = "email" })
             </div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-2">
-                <label class="form-label" asp-for="Name"></label>
-                @Html.TextBoxFor(x => x.Name, new { @required = "required", @class = "form-control" })
+                <label class="form-label" asp-for="Form.Name"></label>
+                @Html.TextBoxFor(x => x.Form.Name, new { @required = "required", @class = "form-control" })
             </div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-2">
-                <label class="form-label" asp-for="Surname"></label>
-                @Html.TextBoxFor(x => x.Surname, new { @required = "required", @class = "form-control" })
+                <label class="form-label" asp-for="Form.Surname"></label>
+                @Html.TextBoxFor(x => x.Form.Surname, new { @required = "required", @class = "form-control" })
             </div>
         </div>
         <button type="submit">Create</button>

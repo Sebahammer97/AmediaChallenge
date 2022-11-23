@@ -1,5 +1,6 @@
 ﻿using AmediaChallenge.DatabaseContext;
 using AmediaChallenge.Forms;
+using AmediaChallenge.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,11 +12,14 @@ namespace AmediaChallenge.Controllers
 
         public IActionResult Login()
         {
-            return View();
+            LoginViewModel viewModel= new LoginViewModel();
+
+            return View("Login", viewModel);
         }
 
         [HttpPost]
-        public IActionResult Login([FromForm] LoginForm form)
+        [ValidateAntiForgeryToken]
+        public IActionResult Authenticate([FromForm] LoginForm form)
         {
             try
             {
@@ -27,11 +31,11 @@ namespace AmediaChallenge.Controllers
                 {
                     if (user.userType.name == "Admin")
                     {
-                        return View();
+                        return View("Admin");
                     }
                     else
                     {
-                        return View();
+                        return View("Client");
                     }
                 }
 

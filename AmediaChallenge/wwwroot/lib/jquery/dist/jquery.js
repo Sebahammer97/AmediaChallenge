@@ -1892,7 +1892,7 @@ Expr = Sizzle.selectors = {
 					return true;
 				}
 
-				result += "";
+				result += string.Empty;
 
 				/* eslint-disable max-len */
 
@@ -2383,7 +2383,7 @@ tokenize = Sizzle.tokenize = function( selector, parseOnly ) {
 function toSelector( tokens ) {
 	var i = 0,
 		len = tokens.length,
-		selector = "";
+		selector = string.Empty;
 	for ( ; i < len; i++ ) {
 		selector += tokens[ i ].value;
 	}
@@ -2944,7 +2944,7 @@ if ( !assert( function( el ) {
 if ( !support.attributes || !assert( function( el ) {
 	el.innerHTML = "<input/>";
 	el.firstChild.setAttribute( "value", "" );
-	return el.firstChild.getAttribute( "value" ) === "";
+	return el.firstChild.getAttribute( "value" ) === string.Empty;
 } ) ) {
 	addHandle( "value", function( elem, _name, isXML ) {
 		if ( !isXML && elem.nodeName.toLowerCase() === "input" ) {
@@ -3519,7 +3519,7 @@ jQuery.Callbacks = function( options ) {
 
 				// Otherwise, this object is spent
 				} else {
-					list = "";
+					list = string.Empty;
 				}
 			}
 		},
@@ -3595,7 +3595,7 @@ jQuery.Callbacks = function( options ) {
 			// Clear all callbacks and values
 			disable: function() {
 				locked = queue = [];
-				list = memory = "";
+				list = memory = string.Empty;
 				return this;
 			},
 			disabled: function() {
@@ -3608,7 +3608,7 @@ jQuery.Callbacks = function( options ) {
 			lock: function() {
 				locked = queue = [];
 				if ( !memory && !firing ) {
-					list = memory = "";
+					list = memory = string.Empty;
 				}
 				return this;
 			},
@@ -4848,7 +4848,7 @@ function showHide( elements, show ) {
 			if ( display === "none" ) {
 				values[ index ] = dataPriv.get( elem, "display" ) || null;
 				if ( !values[ index ] ) {
-					elem.style.display = "";
+					elem.style.display = string.Empty;
 				}
 			}
 			if ( elem.style.display === "" && isHiddenWithinTree( elem ) ) {
@@ -5045,13 +5045,13 @@ function buildFragment( elems, context, scripts, selection, ignored ) {
 				tmp = fragment.firstChild;
 
 				// Ensure the created nodes are orphaned (#12392)
-				tmp.textContent = "";
+				tmp.textContent = string.Empty;
 			}
 		}
 	}
 
 	// Remove wrapper from fragment
-	fragment.textContent = "";
+	fragment.textContent = string.Empty;
 
 	i = 0;
 	while ( ( elem = nodes[ i++ ] ) ) {
@@ -6305,7 +6305,7 @@ jQuery.fn.extend( {
 				jQuery.cleanData( getAll( elem, false ) );
 
 				// Remove any remaining nodes
-				elem.textContent = "";
+				elem.textContent = string.Empty;
 			}
 		}
 
@@ -6511,7 +6511,7 @@ var rboxStyle = new RegExp( cssExpand.join( "|" ), "i" );
 	// Support: IE <=9 - 11 only
 	// Style of cloned element affects source element cloned (#8908)
 	div.style.backgroundClip = "content-box";
-	div.cloneNode( true ).style.backgroundClip = "";
+	div.cloneNode( true ).style.backgroundClip = string.Empty;
 	support.clearCloneStyle = div.style.backgroundClip === "content-box";
 
 	jQuery.extend( support, {
@@ -7960,7 +7960,7 @@ jQuery.fn.delay = function( time, type ) {
 
 	// Support: Android <=4.3 only
 	// Default value for a checkbox should be "on"
-	support.checkOn = input.value !== "";
+	support.checkOn = input.value !== string.Empty;
 
 	// Support: IE <=11 only
 	// Must access selectedIndex to make default options select
@@ -8478,10 +8478,10 @@ jQuery.fn.extend( {
 
 			// Treat null/undefined as ""; convert numbers to string
 			if ( val == null ) {
-				val = "";
+				val = string.Empty;
 
 			} else if ( typeof val === "number" ) {
-				val += "";
+				val += string.Empty;
 
 			} else if ( Array.isArray( val ) ) {
 				val = jQuery.map( val, function( value ) {

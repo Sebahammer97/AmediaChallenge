@@ -9,8 +9,8 @@
     <form asp-controller="BajaUsuarioController" asp-action="BajaUsuario" method="post" id="bajaUsuarioForm" role="form">
         <div class="form-row">
             <div class="form-group col-md-2">
-                <label class="form-label" asp-for="Username"></label>
-                @Html.TextBoxFor(x => x.Username, new { @required = "required", @class = "form-control" })
+                <label class="form-label" asp-for="Form.Username"></label>
+                @Html.TextBoxFor(x => x.Form.Username, new { @required = "required", @class = "form-control" })
             </div>
         </div>
         <button type="submit">Delete</button>
